@@ -5,6 +5,8 @@ Use cases:
 * If we discover something odd with a telescope/backend for a given period, how can we identify which data might be affected?
 
 
+Requires an API key for posting, either through environment variable `$PULSAR_API_KEY` or `key=...` in `post()` methods
+
 Examples:
 
 Post an observation:
