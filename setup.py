@@ -9,7 +9,7 @@ setup(
     url="",
     packages=find_packages(),
     entry_points={},
-    install_requires=["astropy", "pandas"],
+    install_requires=["astropy", "pandas", "loguru", "requests"],
     python_requires=">=3.7",
     #package_data={"simpleRM": ["data/*.*"]},
     #include_package_data=True,
