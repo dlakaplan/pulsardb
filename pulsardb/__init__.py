@@ -12,6 +12,15 @@ import loguru
 from loguru import logger
 
 _url = "http://localhost:8000/api/"
+_json_header = {'Accept': 'application/json'}
+_api_key_name = "PULSAR_API_KEY"
+
+API_KEY = None
+_auth_header = None
+if _api_key_name in os.environ:
+    # https://florimondmanca.github.io/djangorestframework-api-key/guide/#api-key-custom-keyword
+    API_KEY = os.environ[_api_key_name]
+    _auth_header = {"Authorization": f"Api-Key {API_KEY}"}
 
 def _convert_time(t):
     if isinstance(t, Time):
@@ -33,7 +42,7 @@ class Pulsars():
     @classmethod
     def get(self, format="json"):
         assert format.lower() in ["json","pandas","table"]
-        response = requests.get(_url + self.endpoint)
+        response = requests.get(_url + self.endpoint, headers=_json_header)
         if response.status_code == 200:
             if format.lower() == "json":
                 return response.json()
@@ -50,8 +59,12 @@ class Pulsars():
         data = {"name": name,
                 "ra": ra,
                 "dec": dec}
+        if _auth_header is None:
+            logger.error(f"${_api_key_name} is required for POST")
+            return None
         response = requests.post(_url + self.endpoint,
-                                 json = data)
+                                 json = data,
+                                 headers=_auth_header)
         if response.status_code != 201:
             logger.warning(f"Attempt to add '{name}' to database did not succeed (code={response.status_code})")
         if aliases is not None and len(aliases)>0:
@@ -60,7 +73,8 @@ class Pulsars():
                 data = {"name": alias,
                         "pulsar": name}
                 response.append(requests.post(_url + self.aliasendpoint,
-                                              json = data))
+                                              json = data,
+                                 headers=_auth_header))
                 if response[-1].status_code != 201:
                     logger.warning(f"Attempt to add '{alias}' as alias of '{name}' to database did not succeed (code={response[-1].status_code})")
                 
@@ -74,7 +88,7 @@ class Telescopes():
     @classmethod
     def get(self, format="json"):
         assert format.lower() in ["json","pandas","table"]
-        response = requests.get(_url + self.endpoint)
+        response = requests.get(_url + self.endpoint, headers=_json_header)
         if response.status_code == 200:
             if format.lower() == "json":
                 return response.json()
@@ -124,7 +138,7 @@ class Observations():
             else:
                 data['max_frequency'] = max_frequency
                 
-        response = requests.get(_url + self.endpoint, params = data)
+        response = requests.get(_url + self.endpoint, params = data, headers=_json_header)
         if response.status_code == 200:
             if format.lower() == "json":
                 return response.json()
@@ -138,6 +152,9 @@ class Observations():
 
     @classmethod
     def post(self, pulsar, telescope, frequency, submitter, project, start, stop, notes=""):
+        if _auth_header is None:
+            logger.error(f"${_api_key_name} is required for POST")
+            return None
         tstart = _convert_time(start)
         tstop = _convert_time(stop)
         if isinstance(frequency, u.quantity.Quantity):
@@ -152,7 +169,8 @@ class Observations():
                    "notes": notes,
                    }
         response = requests.post(_url + self.endpoint,
-                                 json = content)
+                                 json = content,
+                                 headers=_auth_header)
         if response.status_code != 201:
             logger.warning(f"Cannot add observation of {pulsar} starting at {tstart} to database: code={response.status_code}")
         return response
