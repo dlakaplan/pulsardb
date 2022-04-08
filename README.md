@@ -1,5 +1,10 @@
 # Pulsar Observation Database Front-end
 
+Use cases:
+* If something weird happens with a pulsar (like J1713), how can we find out who else observed it during a given period?
+* If we discover something odd with a telescope/backend for a given period, how can we identify which data might be affected?
+
+
 Examples:
 
 Post an observation:
