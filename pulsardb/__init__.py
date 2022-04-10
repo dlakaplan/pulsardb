@@ -25,6 +25,18 @@ else:
 
 
 def _convert_time(t):
+    """Convert an input time from one of a number of format to ISO formatted string
+
+    Parameters
+    ----------
+    t : Time, str, float
+        Input time.  If float, MJD is assumed
+
+    Returns
+    -------
+    str :
+        ISO formatted string
+    """
     if isinstance(t, Time):
         return t.isot
     elif isinstance(t, datetime.datetime):
@@ -38,12 +50,30 @@ def _convert_time(t):
 
 
 class Pulsars:
-
+    """
+    Database of pulsar names
+    """
+    
     endpoint = "pulsars/"
     aliasendpoint = "pulsaraliases/"
 
     @classmethod
     def get(self, format="json"):
+        """
+        Retrieve list of pulsar names, plus any aliases and associated projects
+
+        Parameters
+        ----------
+        format : str, optional
+            Format of output.  'JSON', 'pandas', 'table'
+            
+
+        Returns
+        -------
+        output :
+            pulsar data (if successfully retrieved), otherwise result of `requests.get()` query
+            
+        """
         assert format.lower() in ["json", "pandas", "table"]
         response = requests.get(_url + self.endpoint, headers=_json_header)
         if response.status_code == 200:
@@ -61,6 +91,26 @@ class Pulsars:
 
     @classmethod
     def post(self, name, ra, dec, aliases=None, key=None):
+        """
+        Submit a pulsar to the database
+
+        Parameters
+        ----------
+        name : str
+        ra : float
+            RA in degrees
+        dec : float
+            Dec in degrees
+        aliases : iterable, optional
+            List of pulsar name aliases
+        key : str, optional
+            API key (if '$PULSAR_API_KEY' is not defined)
+            
+        Returns
+        -------
+        respose :
+            result of `requests.post()`
+        """
         data = {"name": name, "ra": ra, "dec": dec}
         if (_auth_header is None) and (key is None):
             logger.error(
@@ -95,11 +145,30 @@ class Pulsars:
 
 
 class Telescopes:
+    """
+    Database of Telescope names and aliases
+    """
 
     endpoint = "telescopes/"
 
     @classmethod
     def get(self, format="json"):
+        """
+        Retrieve list of telescope names, plus any aliases
+
+        Parameters
+        ----------
+        format : str, optional
+            Format of output.  'JSON', 'pandas', 'table'
+            
+
+        Returns
+        -------
+        output :
+            telescope data (if successfully retrieved), otherwise result of `requests.get()` query
+            
+        """
+
         assert format.lower() in ["json", "pandas", "table"]
         response = requests.get(_url + self.endpoint, headers=_json_header)
         if response.status_code == 200:
@@ -118,6 +187,9 @@ class Telescopes:
 
 
 class Observations:
+    """
+    Database of pulsar observations
+    """
 
     endpoint = "observations/"
 
@@ -133,6 +205,35 @@ class Observations:
         max_frequency=None,
         format="json",
     ):
+        """
+        Retrieve list of observations
+
+        Parameters
+        ----------
+        pulsar : str, optional
+            Pulsar name to match
+        telescope : str, optional
+            Telescope name to match
+        project : str, optional
+            Project name to match
+        min_time : `astropy.time.Time`, float, str, optional
+            Minimum start time of observation (`float` is assumed to be MJD)
+        max_time : `astropy.time.Time`, float, str, optional
+            Maximum stop time of observation (`float` is assumed to be MJD)
+        min_frequency : float or `astropy.units.quantity.Quantity`, optional
+            Minimum frequency of observation (`float` is assumed to be MHz)
+        max_frequency : float or `astropy.units.quantity.Quantity`, optional
+            Maximum frequency of observation (`float` is assumed to be MHz)
+        format : str, optional
+            Format of output.  'JSON', 'pandas', 'table'            
+
+        Returns
+        -------
+        output :
+            observation data (if successfully retrieved), otherwise result of `requests.get()` query
+            
+        """
+
         assert format.lower() in ["json", "pandas", "table"]
         data = {}
         if pulsar is not None:
@@ -189,6 +290,36 @@ class Observations:
         notes="",
         key=None,
     ):
+        """
+        Submit a pulsar observation to the database
+
+        Parameters
+        ----------
+        pulsar : str
+            Pulsar name or alias
+        telescope : str
+            Telescope name or alias
+        frequency : float or `astropy.units.quantity.Quantity`
+            Frequency (if `float` assumed to be MHz)
+        submitter : int or str
+            Name or ID of submitter
+        project : str
+            Project name
+        start :  `astropy.time.Time`, float, str
+            Start time of observation (`float` is assumed to be MJD)
+        stop :  `astropy.time.Time`, float, str
+            Stop time of observation (`float` is assumed to be MJD)
+        notes : str, optional
+            Any additional notes
+        key : str, optional
+            API key (if '$PULSAR_API_KEY' is not defined)
+            
+        Returns
+        -------
+        respose :
+            result of `requests.post()`
+        """
+
         if (_auth_header is None) and (key is None):
             logger.error(
                 f"${_api_key_name} is required for POST, or a value supplied by 'key=...'"
