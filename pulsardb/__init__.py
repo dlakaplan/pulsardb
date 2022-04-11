@@ -53,17 +53,19 @@ class Pulsars:
     """
     Database of pulsar names
     """
-    
+
     endpoint = "pulsars/"
     aliasendpoint = "pulsaraliases/"
 
     @classmethod
-    def get(self, format="json"):
+    def get(self, pulsar=None, format="json"):
         """
         Retrieve list of pulsar names, plus any aliases and associated projects
 
         Parameters
         ----------
+        pulsar : str, optional
+            Pulsar name to match 
         format : str, optional
             Format of output.  'JSON', 'pandas', 'table'
             
@@ -75,7 +77,11 @@ class Pulsars:
             
         """
         assert format.lower() in ["json", "pandas", "table"]
-        response = requests.get(_url + self.endpoint, headers=_json_header)
+        data = {}
+        if pulsar is not None:
+            data["name"] = pulsar
+
+        response = requests.get(_url + self.endpoint, params=data, headers=_json_header)
         if response.status_code == 200:
             if format.lower() == "json":
                 return response.json()
@@ -198,6 +204,8 @@ class Observations:
         self,
         pulsar=None,
         telescope=None,
+        receiver=None,
+        backend=None,
         project=None,
         min_time=None,
         max_time=None,
@@ -214,6 +222,10 @@ class Observations:
             Pulsar name to match
         telescope : str, optional
             Telescope name to match
+        receiver : str, optional
+            Receiver name to match
+        backend : str, optional
+            Backend name to match
         project : str, optional
             Project name to match
         min_time : `astropy.time.Time`, float, str, optional
@@ -240,6 +252,10 @@ class Observations:
             data["pulsar"] = pulsar
         if telescope is not None:
             data["telescope"] = telescope
+        if receiver is not None:
+            data["receiver"] = receiver
+        if backend is not None:
+            data["backend"] = backend
         if project is not None:
             data["project"] = project
         if min_time is not None:
@@ -282,6 +298,8 @@ class Observations:
         self,
         pulsar,
         telescope,
+        receiver,
+        backend,
         frequency,
         submitter,
         project,
@@ -299,6 +317,10 @@ class Observations:
             Pulsar name or alias
         telescope : str
             Telescope name or alias
+        receiver : str
+            Reciver name or alias
+        backend : str
+            Backend name
         frequency : float or `astropy.units.quantity.Quantity`
             Frequency (if `float` assumed to be MHz)
         submitter : int or str
@@ -336,6 +358,8 @@ class Observations:
         content = {
             "pulsar": pulsar,
             "telescope": telescope,
+            "receiver": receiver,
+            "backend": backend,
             "frequency": frequency,
             "submitter": submitter,
             "project": project,
