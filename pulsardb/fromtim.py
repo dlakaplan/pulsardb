@@ -29,6 +29,43 @@ def fromtim(
     db=False,
     apikey=None,
 ):
+    """
+    Parse a timfile and generate observation records
+
+    Parameters
+    ----------
+    timfile : str or path-like
+    pulsar : str
+        Name of pulsar
+    submitter : str
+        ID of submitter
+    durationflag : str, optional
+        Flag to identify observation duration (without "-")
+    duration : float, optional
+        Duration in s if ``durationflag`` is not present
+    receiverflag : str, optional
+        Flag to identify receiver (without "-")
+    receiver : str, optional
+        Receiver if ``receiverflag`` is not present
+    backendflag : str, optional
+        Flag to identify backend (without "-")
+    backend : str, optional
+        Backend if ``backendflag`` is not present
+    projectflag : str, optional
+        Flag to identify project (without "-")
+    project : str, optional
+        Project if ``projectflag`` is not present
+    telescope : str, optional
+        Telescope if lookup not possible
+    db : bool, optional
+        Whether to try to insert records directly in database
+    apikey : str, optional
+        API key for database insertion
+
+    Returns
+    -------
+    records : str
+    """
 
     telescopes = pulsardb.Telescopes.get(format="table")
     toas = pint.toa.get_TOAs(timfile)
