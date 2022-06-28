@@ -8,10 +8,13 @@ setup(
     author_email="kaplan@uwm.edu",
     url="",
     packages=find_packages(),
-    entry_points={},
+    entry_points={
+        "console_scripts": [
+            "tim2csv=pulsardb.scripts.tim2csv:main",
+        ],
+    },
     install_requires=["astropy", "pandas", "loguru", "requests"],
     python_requires=">=3.7",
-    #package_data={"simpleRM": ["data/*.*"]},
-    #include_package_data=True,
+    # include_package_data=True,
     zip_safe=False,
 )
