@@ -66,11 +66,10 @@ def main():
     )
     args = parser.parse_args()
     pint.logging.setup(level=args.loglevel)
-    pulsardb.fromtim.fromtim(
+    outtxt = pulsardb.fromtim.fromtim(
         args.timfile,
         args.pulsar,
         args.submitter,
-        out=args.out,
         durationflag=args.durationflag,
         duration=args.duration,
         receiverflag=args.receiverflag,
@@ -83,6 +82,13 @@ def main():
         db=args.db,
         apikey=args.apikey,
     )
+    if args.out is None:
+        outfile = sys.stdout
+    else:
+        outfile = open(args.out, "w")
+    outfile.write(outtxt)
+    if args.out is not None:
+        log.info(f"Wrote to {args.out}")
 
 
 if __name__ == "__main__":

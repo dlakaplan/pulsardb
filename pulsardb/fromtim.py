@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+from pathlib import Path
 
 from astropy import units as u
 from astropy.time import Time, TimeDelta
@@ -16,7 +17,6 @@ def fromtim(
     timfile,
     pulsar,
     submitter,
-    out=None,
     durationflag="tobs",
     duration=1800,
     receiverflag="fe",
@@ -35,14 +35,7 @@ def fromtim(
     log.info(f"Read {len(toas)} TOAs from {timfile}")
     # these should uniquely identify the observations
     names = np.array(toas.get_flag_value("name")[0])
-    if out is not None:
-        fout = open(out, "w")
-    else:
-        fout = sys.stdout
-    print(
-        f"# Start, Stop, Pulsar, Project, Telescope, Receiver, Backend, Frequency, Submitter",
-        file=fout,
-    )
+    out = f"# Start, Stop, Pulsar, Project, Telescope, Receiver, Backend, Frequency, Submitter\n"
     defaulttelescope = telescope
     for name in np.unique(names):
         select = names == name
@@ -75,10 +68,8 @@ def fromtim(
             f"Observation {name} at {start} with project={project}, telescope={telescope}, receiver={receiver}, backend={backend}, frequency={frequency}, duration={duration}"
         )
         if telescope is not None:
-            print(
-                f"{start.mjd}, {stop.mjd}, {pulsar}, {project}, {telescope}, {receiver}, {backend}, {frequency.to_value(u.MHz)}, {submitter}",
-                file=fout,
-            )
+            out += f"{start.mjd}, {stop.mjd}, {pulsar}, {project}, {telescope}, {receiver}, {backend}, {frequency.to_value(u.MHz)}, {submitter}\n"
+
             if db:
                 response = pulsardb.Observations.post(
                     pulsar=pulsar,
@@ -96,5 +87,4 @@ def fromtim(
             log.warning(
                 f"Cannot determine entry with undefined telescope for observation {name}"
             )
-    if out is not None:
-        log.info(f"Wrote to {out}")
+    return out
