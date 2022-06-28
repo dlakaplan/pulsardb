@@ -15,7 +15,7 @@ import pulsardb
 
 def main():
     parser = argparse.ArgumentParser(
-        description="""Add observations to database from tim file.  
+        description="""Make CSV database entries from tim file, and optionally upload to database.
         Can be read using e.g.,
             `Table.read('test.csv',format='ascii.commented_header',delimiter=',')`""",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -41,6 +41,19 @@ def main():
     parser.add_argument("--backend", help="Backend when not otherwise specified")
     parser.add_argument("--projectflag", default="pta", help="Flag for project")
     parser.add_argument("--project", help="Project when not otherwise specified")
+    parser.add_argument(
+        "--telescope", default=None, help="Telescope when not otherwise specified"
+    )
+    parser.add_argument(
+        "--db",
+        action="store_true",
+        default=False,
+        help="Directly upload to database (may be slow)?",
+    )
+    parser.add_argument(
+        "--apikey",
+        help="API key for direct submission (or specify via $PULSAR_API_KEY)",
+    )
 
     parser.add_argument(
         "--log-level",
@@ -89,7 +102,7 @@ def main():
         project = toas[select].get_flag_value(
             args.projectflag, fill_value=args.project
         )[0][0]
-        telescope = None
+        telescope = args.telescope
         for telname in telescopes["name"]:
             if (
                 receiver
@@ -107,9 +120,22 @@ def main():
                 f"{start.mjd}, {stop.mjd}, {args.pulsar}, {project}, {telescope}, {receiver}, {backend}, {frequency.to_value(u.MHz)}, {args.submitter}",
                 file=fout,
             )
+            if args.db:
+                response = pulsardb.Observations.post(
+                    pulsar=args.pulsar,
+                    telescope=telescope,
+                    frequency=frequency,
+                    project=project,
+                    start=start,
+                    stop=stop,
+                    receiver=receiver,
+                    backend=backend,
+                    submitter=args.submitter,
+                    key=args.apikey,
+                )
         else:
             log.warning(
-                f"Cannot post entry with undefined telescope for observation {name}"
+                f"Cannot determine entry with undefined telescope for observation {name}"
             )
     if args.out is not None:
         log.info(f"Wrote to {args.out}")

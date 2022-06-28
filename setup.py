@@ -10,7 +10,7 @@ setup(
     packages=find_packages(),
     entry_points={
         "console_scripts": [
-            "tim2csv=pulsardb.scripts.tim2csv:main",
+            "tim2db=pulsardb.scripts.tim2db:main",
         ],
     },
     install_requires=["astropy", "pandas", "loguru", "requests"],
