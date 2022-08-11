@@ -7,11 +7,12 @@ from astropy.table import Table
 import pandas as pd
 import os
 import datetime
-import loguru
 
 from loguru import logger
 
 _url = "http://localhost:8000/api/"
+# _url = "https://observations.nanograv.org/api/"
+
 _json_header = {"Accept": "application/json"}
 _api_key_name = "PULSAR_API_KEY"
 
@@ -54,8 +55,8 @@ class Pulsars:
     Database of pulsar names
     """
 
-    endpoint = "pulsars/"
-    aliasendpoint = "pulsaraliases/"
+    endpoint = "pulsars-api/"
+    aliasendpoint = "pulsaraliases-api/"
 
     @classmethod
     def get(self, pulsar=None, format="json"):
@@ -65,16 +66,16 @@ class Pulsars:
         Parameters
         ----------
         pulsar : str, optional
-            Pulsar name to match 
+            Pulsar name to match
         format : str, optional
             Format of output.  'JSON', 'pandas', 'table'
-            
+
 
         Returns
         -------
         output :
             pulsar data (if successfully retrieved), otherwise result of `requests.get()` query
-            
+
         """
         assert format.lower() in ["json", "pandas", "table"]
         data = {}
@@ -86,9 +87,9 @@ class Pulsars:
             if format.lower() == "json":
                 return response.json()
             elif format.lower() == "pandas":
-                return pd.json_normalize(response.json())
+                return pd.json_normalize(response.json()["results"])
             elif format.lower() == "table":
-                return Table.from_pandas(pd.json_normalize(response.json()))
+                return Table.from_pandas(pd.json_normalize(response.json()["results"]))
         else:
             logger.warning(
                 f"Attempt to retrieve Pulsars from database did not succeed (code={response.status_code})"
@@ -111,7 +112,7 @@ class Pulsars:
             List of pulsar name aliases
         key : str, optional
             API key (if '$PULSAR_API_KEY' is not defined)
-            
+
         Returns
         -------
         respose :
@@ -155,7 +156,7 @@ class Telescopes:
     Database of Telescope names and aliases
     """
 
-    endpoint = "telescopes/"
+    endpoint = "telescopes-api/"
 
     @classmethod
     def get(self, format="json"):
@@ -166,13 +167,13 @@ class Telescopes:
         ----------
         format : str, optional
             Format of output.  'JSON', 'pandas', 'table'
-            
+
 
         Returns
         -------
         output :
             telescope data (if successfully retrieved), otherwise result of `requests.get()` query
-            
+
         """
 
         assert format.lower() in ["json", "pandas", "table"]
@@ -181,12 +182,12 @@ class Telescopes:
             if format.lower() == "json":
                 return response.json()
             elif format.lower() == "pandas":
-                return pd.json_normalize(response.json())
+                return pd.json_normalize(response.json()["results"])
             elif format.lower() == "table":
-                return Table.from_pandas(pd.json_normalize(response.json()))
+                return Table.from_pandas(pd.json_normalize(response.json()["results"]))
         else:
             logger.warning(
-                f"Attempt to retrieve Pulsars from database did not succeed (code={response.status_code})"
+                f"Attempt to retrieve Telescopes from database did not succeed (code={response.status_code})"
             )
 
         return response
@@ -197,7 +198,7 @@ class Observations:
     Database of pulsar observations
     """
 
-    endpoint = "observations/"
+    endpoint = "observations-api/"
 
     @classmethod
     def get(
@@ -237,13 +238,13 @@ class Observations:
         max_frequency : float or `astropy.units.quantity.Quantity`, optional
             Maximum frequency of observation (`float` is assumed to be MHz)
         format : str, optional
-            Format of output.  'JSON', 'pandas', 'table'            
+            Format of output.  'JSON', 'pandas', 'table'
 
         Returns
         -------
         output :
             observation data (if successfully retrieved), otherwise result of `requests.get()` query
-            
+
         """
 
         assert format.lower() in ["json", "pandas", "table"]
@@ -284,9 +285,9 @@ class Observations:
             if format.lower() == "json":
                 return response.json()
             elif format.lower() == "pandas":
-                return pd.json_normalize(response.json())
+                return pd.json_normalize(response.json()["results"])
             elif format.lower() == "table":
-                return Table.from_pandas(pd.json_normalize(response.json()))
+                return Table.from_pandas(pd.json_normalize(response.json()["results"]))
         else:
             logger.warning(
                 f"Attempt to retrieve Observations from database did not succeed (code={response.status_code})"
@@ -335,7 +336,7 @@ class Observations:
             Any additional notes
         key : str, optional
             API key (if '$PULSAR_API_KEY' is not defined)
-            
+
         Returns
         -------
         respose :
