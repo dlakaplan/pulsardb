@@ -7,6 +7,20 @@ Use cases:
 
 Requires an API key for posting, either through environment variable `$PULSAR_API_KEY` or `key=...` in `post()` methods
 
+Querying (through RESTful API or python):
+* `pulsar=<name>`: query a pulsar by exact name (but this will also query by aliases)
+* `pulsar_contains=<name>`: query a pulsar by partial match (will not also query aliases)
+* `project=<name>`: query by one or more (logical OR)
+* `min_time=<time>`: start time (`astropy` `Time`, float (MJD), or string that `astropy` can parse)
+* `max_time=<time>`: end time (`astropy` `Time`, float (MJD), or string that `astropy` can parse)
+* `min_frequency=<frequency>`: (`astropy` `Quantity` or float (MHz))
+* `max_frequency=<frequency>`: (`astropy` `Quantity` or float (MHz))
+* `backend=<name>`: query by one or more (logical OR)
+* `receiver=<name>`: query by one or more (logical OR)
+* `telescope=<name>`: query a telescope by exact name (but this will also query by aliases)
+* `telescopes=<name>`: query a telescope by one or more exact names (logical OR, will not also query aliases)
+* `sort=<key>`: can be `frequency`, `pulsar`, `telescope`, `project`, `submitter`, `datetime_range__startswith`, `datetime_range__endswith`.  Start key with `-` to do descending
+
 Examples:
 
 Post an observation:

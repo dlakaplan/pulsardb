@@ -87,9 +87,9 @@ class Pulsars:
             if format.lower() == "json":
                 return response.json()
             elif format.lower() == "pandas":
-                return pd.json_normalize(response.json()["results"])
+                return pd.json_normalize(response.json())
             elif format.lower() == "table":
-                return Table.from_pandas(pd.json_normalize(response.json()["results"]))
+                return Table.from_pandas(pd.json_normalize(response.json()))
         else:
             logger.warning(
                 f"Attempt to retrieve Pulsars from database did not succeed (code={response.status_code})"
@@ -182,9 +182,9 @@ class Telescopes:
             if format.lower() == "json":
                 return response.json()
             elif format.lower() == "pandas":
-                return pd.json_normalize(response.json()["results"])
+                return pd.json_normalize(response.json())
             elif format.lower() == "table":
-                return Table.from_pandas(pd.json_normalize(response.json()["results"]))
+                return Table.from_pandas(pd.json_normalize(response.json()))
         else:
             logger.warning(
                 f"Attempt to retrieve Telescopes from database did not succeed (code={response.status_code})"
@@ -204,6 +204,7 @@ class Observations:
     def get(
         self,
         pulsar=None,
+        pulsar_contains=None,
         telescope=None,
         receiver=None,
         backend=None,
@@ -219,15 +220,19 @@ class Observations:
 
         Parameters
         ----------
-        pulsar : str, optional
-            Pulsar name to match
+        pulsar : str or list, optional
+            Pulsar name to match (exact, aliases allowed)
+        pulsar_contains : str, optional
+            Pulsar name to match (case insensitive, partial match)
         telescope : str, optional
-            Telescope name to match
-        receiver : str, optional
+            Telescope name to match (exact, aliases allowed)
+        telescopes : str or list, optional
+            Telescope name to match (exact, multiple values possible)
+        receiver : str or list, optional
             Receiver name to match
-        backend : str, optional
+        backend : str or list, optional
             Backend name to match
-        project : str, optional
+        project : str or list, optional
             Project name to match
         min_time : `astropy.time.Time`, float, str, optional
             Minimum start time of observation (`float` is assumed to be MJD)
@@ -251,6 +256,8 @@ class Observations:
         data = {}
         if pulsar is not None:
             data["pulsar"] = pulsar
+        if pulsar_contains is not None:
+            data["pulsar__icontains"] = pulsar_contains
         if telescope is not None:
             data["telescope"] = telescope
         if receiver is not None:
@@ -271,23 +278,23 @@ class Observations:
                 data["max_MJD"] = max_time
         if min_frequency is not None:
             if isinstance(min_frequency, u.quantity.Quantity):
-                data["min_frequency"] = min_frequency.to_value(u.MHz)
+                data["frequency__after"] = min_frequency.to_value(u.MHz)
             else:
-                data["min_frequency"] = min_frequency
+                data["frequency__after"] = min_frequency
         if max_frequency is not None:
             if isinstance(max_frequency, u.quantity.Quantity):
-                data["max_frequency"] = max_frequency.to_value(u.MHz)
+                data["frequency__before"] = max_frequency.to_value(u.MHz)
             else:
-                data["max_frequency"] = max_frequency
+                data["frequency__before"] = max_frequency
 
         response = requests.get(_url + self.endpoint, params=data, headers=_json_header)
         if response.status_code == 200:
             if format.lower() == "json":
                 return response.json()
             elif format.lower() == "pandas":
-                return pd.json_normalize(response.json()["results"])
+                return pd.json_normalize(response.json())
             elif format.lower() == "table":
-                return Table.from_pandas(pd.json_normalize(response.json()["results"]))
+                return Table.from_pandas(pd.json_normalize(response.json()))
         else:
             logger.warning(
                 f"Attempt to retrieve Observations from database did not succeed (code={response.status_code})"

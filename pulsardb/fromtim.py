@@ -85,7 +85,8 @@ def fromtim(
                 )[0]
             )
             * u.s
-        ).max()
+        ).sum()
+        # this may not be exact
         stop = start + duration
         # assume they all have the same values of these (check?)
         receiver = toas[select].get_flag_value(receiverflag, fill_value=receiver)[0][0]
