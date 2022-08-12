@@ -32,6 +32,8 @@ def fromtim(
     """
     Parse a timfile and generate observation records
 
+    Collects TOAs with the same ``name`` and determines total time as the sum of individual durations
+
     Parameters
     ----------
     timfile : str or path-like
